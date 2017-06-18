@@ -1,7 +1,16 @@
 <template>
-  <div class="container">
+  <form v-if="!$store.state.authUser" @submit.prevent="login">
+    <h1>This page is for C4 members only. Please login to continue.</h1>
+    <p class="error" v-if="formError">{{ formError }}</p>
+    <p>Username: <input type="text" v-model="formUsername" name="username" /></p>
+    <p>Password: <input type="password" v-model="formPassword" name="password" /></p>
+    <button type="submit">Login</button>
+    <p><e>Not a member? <nuxt-link to="/">Click here to go back home.</nuxt-link></e></p>
+  </form>
+  <div v-else class="container">
     <div>
       <v-header/>
+      <button @click="logout">Logout</button>
       <h1 class="title">
         C4 Ministry
       </h1>
@@ -185,6 +194,33 @@ export default {
   components: {
     'v-header': Header,
     'v-footer': Footer
+  },
+  data () {
+    return {
+      formError: null,
+      formUsername: '',
+      formPassword: ''
+    }
+  },
+  methods: {
+    login () {
+      this.$store.dispatch('login', {
+        username: this.formUsername,
+        password: this.formPassword
+      })
+      .then(() => {
+        this.formUsername = ''
+        this.formPassword = ''
+        this.formError = null
+      })
+      .catch((e) => {
+        this.formError = e.message
+      })
+    },
+    logout () {
+      this.$store.dispatch('logout')
+      this.$router.push('/')
+    }
   }
 }
 </script>
